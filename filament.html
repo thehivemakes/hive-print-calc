@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Filament Usage Calculator — PrintCalc</title>
+<meta name="description" content="Filament usage calculator. Enter print volume to estimate grams, meters, and cost of filament. Supports PLA, ABS, PETG, TPU.">
+<meta property="og:title" content="Filament Usage Calculator — PrintCalc">
+<meta property="og:description" content="Filament usage calculator. Enter print volume to estimate grams, meters, and cost of filament. Supports PLA, ABS, PETG, TPU.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://thehivemakes.github.io/hive-print-calc/filament.html">
+<link rel="stylesheet" href="style.css">
+<script src="js/calc-core.js"></script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "Filament Usage Calculator",
+  "url": "https://thehivemakes.github.io/hive-print-calc/filament.html",
+  "description": "Filament usage calculator. Enter print volume to estimate grams, meters, and cost of filament. Supports PLA, ABS, PETG, TPU.",
+  "applicationCategory": "UtilityApplication",
+  "operatingSystem": "Any"
+}
+</script>
+</head>
+<body>
+<header><div class="header-inner"><div class="logo">Print<span>Calc</span></div><div class="tagline">Free 3D printing calculators</div></div></header>
+<nav><div class="nav-inner"><a href="index.html">PrintCalc</a><span class="sep">/</span><span>Filament Usage Calculator</span></div></nav>
+<main>
+  <div class="ad-leaderboard" id="ad-top">Ad</div>
+  <div class="card">
+    <h1>Filament Usage Calculator</h1>
+    <p class="subtitle">Enter print volume or weight to estimate filament length and cost.</p>
+    <div class="form-grid">
+      <div class="field">
+        <label for="volume_cm3">Print volume (cm³)</label>
+        <input type="number" id="volume_cm3" step="0.1" placeholder="25">
+      </div>
+      <div class="field">
+        <label for="infill_pct">Infill percentage (%)</label>
+        <input type="number" id="infill_pct" step="5" placeholder="20" value="20">
+      </div>
+      <div class="field">
+        <label for="material">Material</label>
+        <select id="material"><option value="1.24">PLA (1.24 g/cm³)</option><option value="1.04">ABS (1.04 g/cm³)</option><option value="1.27">PETG (1.27 g/cm³)</option><option value="1.21">TPU (1.21 g/cm³)</option><option value="1.75">Nylon (1.14 g/cm³)</option></select>
+      </div>
+      <div class="field">
+        <label for="spool_cost">Spool cost ($)</label>
+        <input type="number" id="spool_cost" step="1" placeholder="25" value="25">
+      </div>
+      <div class="field">
+        <label for="spool_weight">Spool weight (g)</label>
+        <input type="number" id="spool_weight" step="100" placeholder="1000" value="1000">
+      </div>
+      <div class="field">
+        <label for="fil_diameter">Filament diameter (mm)</label>
+        <select id="fil_diameter"><option value="1.75">1.75mm</option><option value="2.85">2.85mm</option></select>
+      </div>
+    </div>
+    <button class="btn btn-primary" onclick="calculate()">Calculate</button>
+    <button class="btn btn-ghost" onclick="clearAll()">Clear</button>
+    <div class="result" id="result">
+      <div class="result-row">
+        <span class="result-label">Filament weight</span>
+        <span class="result-value" id="fil-weight">—</span>
+      </div>
+      <div class="result-row">
+        <span class="result-label">Filament length</span>
+        <span class="result-value" id="fil-length">—</span>
+      </div>
+      <div class="result-row">
+        <span class="result-label">Material cost</span>
+        <span class="result-value" id="fil-cost">—</span>
+      </div>
+      <div class="result-row">
+        <span class="result-label">Percentage of spool</span>
+        <span class="result-value" id="fil-pct-spool">—</span>
+      </div>
+      <div class="result-note">Weight = volume × density × (infill/100 for infill regions + 100% for shells). This is a rough estimate; actual usage depends on slicer settings, supports, and skirt/brim.</div>
+    </div>
+  </div>
+  <div class="card">
+    <h2 style="font-size:16px;font-weight:700;margin-bottom:12px;">Material Properties</h2>
+    <table class="ref-table" id="ref-table">
+      <thead><tr><th>Material</th><th>Density (g/cm³)</th><th>Print Temp (°C)</th><th>Bed Temp (°C)</th></tr></thead>
+      <tbody>
+        <tr><td>PLA</td><td>1.24</td><td>190–220</td><td>50–60</td></tr>
+        <tr><td>ABS</td><td>1.04</td><td>220–250</td><td>95–110</td></tr>
+        <tr><td>PETG</td><td>1.27</td><td>220–250</td><td>70–80</td></tr>
+        <tr><td>TPU</td><td>1.21</td><td>210–230</td><td>40–60</td></tr>
+        <tr><td>Nylon</td><td>1.14</td><td>240–260</td><td>70–90</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="ad-rectangle" id="ad-mid">Ad</div>
+  <div class="seo-section">
+    <h2>How to Estimate 3D Print Filament Usage</h2>
+    <p>Most slicers show estimated print volume in cubic centimeters. Multiply by the filament density to get weight in grams. Divide by the spool weight to see what percentage of a spool the print uses.</p>
+    <p>Filament length can be calculated from weight: length (m) = weight (g) / (density × π × (d/2)²) where d is filament diameter in cm.</p>
+  </div>
+</main>
+<footer>Free 3D printing calculators. No signup, no tracking. Actual results depend on slicer settings and printer calibration.<br>Built by <a href="https://thehivemakes.github.io/" style="color:var(--accent)">The Hive</a></footer>
+<script>
+
+function calculate() {
+  const vol = CalcCore.get('volume_cm3');
+  const infill = CalcCore.get('infill_pct') / 100;
+  const density = parseFloat(CalcCore.getSelect('material'));
+  const spoolCost = CalcCore.get('spool_cost');
+  const spoolWeight = CalcCore.get('spool_weight');
+  const filDia = parseFloat(CalcCore.getSelect('fil_diameter'));
+  if (isNaN(vol)||vol<=0||isNaN(density)) return;
+
+  // Rough estimate: ~30% of volume is shells (100% fill), rest is infill
+  const shellFrac = 0.3;
+  const effectiveVol = vol * (shellFrac + (1-shellFrac) * infill);
+  const weight = effectiveVol * density;
+  // Length in meters
+  const filRadius = (filDia / 10) / 2; // cm
+  const crossSection = Math.PI * filRadius * filRadius; // cm^2
+  const lengthCm = weight / density / crossSection;
+  const lengthM = lengthCm / 100;
+  const cost = (weight / spoolWeight) * spoolCost;
+  const pctSpool = (weight / spoolWeight) * 100;
+
+  CalcCore.set('fil-weight', CalcCore.fmt(weight, 1) + ' g');
+  CalcCore.set('fil-length', CalcCore.fmt(lengthM, 1) + ' m');
+  CalcCore.set('fil-cost', '$' + CalcCore.fmt(cost, 2));
+  CalcCore.set('fil-pct-spool', CalcCore.fmt(pctSpool, 1) + '% of spool');
+  CalcCore.showResult();
+  CalcCore.saveParams(['volume_cm3','infill_pct','material','spool_cost','spool_weight','fil_diameter']);
+}
+
+function clearAll() {
+  ["volume_cm3", "infill_pct", "material", "spool_cost", "spool_weight", "fil_diameter"].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = el.defaultValue || '';
+  });
+  document.getElementById('result').classList.remove('visible');
+  history.replaceState(null, '', window.location.pathname);
+}
+
+document.addEventListener('DOMContentLoaded', () => { if (window.location.search) calculate(); });
+</script>
+</body>
+</html>

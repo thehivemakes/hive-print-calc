@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Layer Height Guide — PrintCalc</title>
+<meta name="description" content="Layer height guide for 3D printing. Find optimal layer height for your nozzle size. Quality vs speed tradeoffs.">
+<meta property="og:title" content="Layer Height Guide — PrintCalc">
+<meta property="og:description" content="Layer height guide for 3D printing. Find optimal layer height for your nozzle size. Quality vs speed tradeoffs.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://thehivemakes.github.io/hive-print-calc/layer-height.html">
+<link rel="stylesheet" href="style.css">
+<script src="js/calc-core.js"></script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "Layer Height Guide",
+  "url": "https://thehivemakes.github.io/hive-print-calc/layer-height.html",
+  "description": "Layer height guide for 3D printing. Find optimal layer height for your nozzle size. Quality vs speed tradeoffs.",
+  "applicationCategory": "UtilityApplication",
+  "operatingSystem": "Any"
+}
+</script>
+</head>
+<body>
+<header><div class="header-inner"><div class="logo">Print<span>Calc</span></div><div class="tagline">Free 3D printing calculators</div></div></header>
+<nav><div class="nav-inner"><a href="index.html">PrintCalc</a><span class="sep">/</span><span>Layer Height Guide</span></div></nav>
+<main>
+  <div class="ad-leaderboard" id="ad-top">Ad</div>
+  <div class="card">
+    <h1>Layer Height Guide</h1>
+    <p class="subtitle">Enter your nozzle size to see recommended layer heights and print quality tradeoffs.</p>
+    <div class="form-grid">
+      <div class="field">
+        <label for="nozzle">Nozzle diameter (mm)</label>
+        <select id="nozzle"><option value="0.2">0.2mm</option><option value="0.4">0.4mm (standard)</option><option value="0.6">0.6mm</option><option value="0.8">0.8mm</option><option value="1.0">1.0mm</option></select>
+      </div>
+      <div class="field">
+        <label for="priority">Priority</label>
+        <select id="priority"><option value="quality">Quality (fine detail)</option><option value="balanced">Balanced</option><option value="speed">Speed (fast prints)</option></select>
+      </div>
+    </div>
+    <button class="btn btn-primary" onclick="calculate()">Calculate</button>
+    <button class="btn btn-ghost" onclick="clearAll()">Clear</button>
+    <div class="result" id="result">
+      <div class="result-row">
+        <span class="result-label">Minimum layer height</span>
+        <span class="result-value" id="lh-min">—</span>
+      </div>
+      <div class="result-row">
+        <span class="result-label">Recommended layer height</span>
+        <span class="result-value" id="lh-rec">—</span>
+      </div>
+      <div class="result-row">
+        <span class="result-label">Maximum layer height</span>
+        <span class="result-value" id="lh-max">—</span>
+      </div>
+      <div class="result-row">
+        <span class="result-label">Quality description</span>
+        <span class="result-value" id="lh-quality">—</span>
+      </div>
+      <div class="result-row">
+        <span class="result-label">Relative print speed</span>
+        <span class="result-value" id="lh-speed">—</span>
+      </div>
+      <div class="result-note">Rule of thumb: layer height should be 25–75% of nozzle diameter. Below 25% causes poor layer adhesion. Above 75% causes overflow and poor surface quality.</div>
+    </div>
+  </div>
+
+  <div class="ad-rectangle" id="ad-mid">Ad</div>
+  <div class="seo-section">
+    <h2>Choosing the Right Layer Height</h2>
+    <p>Layer height is the single biggest factor in print quality and speed. Thinner layers produce smoother surfaces but take longer. The standard 0.4mm nozzle works well from 0.1mm to 0.3mm layers.</p>
+    <p>For miniatures and detailed models, use 0.08–0.12mm layers. For functional parts where appearance matters less, 0.2–0.3mm is a good balance. For rapid prototypes, go up to 75% of nozzle diameter.</p>
+  </div>
+</main>
+<footer>Free 3D printing calculators. No signup, no tracking. Actual results depend on slicer settings and printer calibration.<br>Built by <a href="https://thehivemakes.github.io/" style="color:var(--accent)">The Hive</a></footer>
+<script>
+
+function calculate() {
+  const nozzle = parseFloat(CalcCore.getSelect('nozzle'));
+  const priority = CalcCore.getSelect('priority');
+  if (isNaN(nozzle)) return;
+
+  const minH = nozzle * 0.25;
+  const maxH = nozzle * 0.75;
+  let rec, quality, speed;
+
+  if (priority === 'quality') {
+    rec = nozzle * 0.25;
+    quality = 'Very fine detail, smooth surfaces, visible layer lines minimal';
+    speed = '3\u20134x slower than max speed';
+  } else if (priority === 'speed') {
+    rec = nozzle * 0.6;
+    quality = 'Visible layer lines, good for prototypes and functional parts';
+    speed = 'Fastest reasonable setting';
+  } else {
+    rec = nozzle * 0.4;
+    quality = 'Good detail with reasonable print times. Best all-around setting.';
+    speed = '~2x slower than max speed';
+  }
+
+  CalcCore.set('lh-min', CalcCore.fmt(minH, 2) + ' mm (25% of nozzle)');
+  CalcCore.set('lh-rec', CalcCore.fmt(rec, 2) + ' mm');
+  CalcCore.set('lh-max', CalcCore.fmt(maxH, 2) + ' mm (75% of nozzle)');
+  CalcCore.set('lh-quality', quality);
+  CalcCore.set('lh-speed', speed);
+  CalcCore.showResult();
+  CalcCore.saveParams(['nozzle','priority']);
+}
+
+function clearAll() {
+  ["nozzle", "priority"].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = el.defaultValue || '';
+  });
+  document.getElementById('result').classList.remove('visible');
+  history.replaceState(null, '', window.location.pathname);
+}
+
+document.addEventListener('DOMContentLoaded', () => { if (window.location.search) calculate(); });
+</script>
+</body>
+</html>

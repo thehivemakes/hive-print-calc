@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Infill Strength Guide — PrintCalc</title>
+<meta name="description" content="Infill strength guide for 3D printing. Compare infill percentages and patterns for strength, weight, and print time.">
+<meta property="og:title" content="Infill Strength Guide — PrintCalc">
+<meta property="og:description" content="Infill strength guide for 3D printing. Compare infill percentages and patterns for strength, weight, and print time.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://thehivemakes.github.io/hive-print-calc/infill.html">
+<link rel="stylesheet" href="style.css">
+<script src="js/calc-core.js"></script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "Infill Strength Guide",
+  "url": "https://thehivemakes.github.io/hive-print-calc/infill.html",
+  "description": "Infill strength guide for 3D printing. Compare infill percentages and patterns for strength, weight, and print time.",
+  "applicationCategory": "UtilityApplication",
+  "operatingSystem": "Any"
+}
+</script>
+</head>
+<body>
+<header><div class="header-inner"><div class="logo">Print<span>Calc</span></div><div class="tagline">Free 3D printing calculators</div></div></header>
+<nav><div class="nav-inner"><a href="index.html">PrintCalc</a><span class="sep">/</span><span>Infill Strength Guide</span></div></nav>
+<main>
+  <div class="ad-leaderboard" id="ad-top">Ad</div>
+  <div class="card">
+    <h1>Infill Strength Guide</h1>
+    <p class="subtitle">Enter infill percentage and pattern to understand strength characteristics.</p>
+    <div class="form-grid">
+      <div class="field">
+        <label for="inf_pct">Infill percentage (%)</label>
+        <input type="number" id="inf_pct" step="5" placeholder="20" value="20">
+      </div>
+      <div class="field">
+        <label for="inf_pattern">Infill pattern</label>
+        <select id="inf_pattern"><option value="grid">Grid / Lines</option><option value="gyroid">Gyroid</option><option value="triangles">Triangles</option><option value="honeycomb">Honeycomb</option><option value="cubic">Cubic</option></select>
+      </div>
+      <div class="field">
+        <label for="walls">Wall count</label>
+        <input type="number" id="walls" min="1" step="1" placeholder="3" value="3">
+      </div>
+    </div>
+    <button class="btn btn-primary" onclick="calculate()">Calculate</button>
+    <button class="btn btn-ghost" onclick="clearAll()">Clear</button>
+    <div class="result" id="result">
+      <div class="result-row">
+        <span class="result-label">Relative strength</span>
+        <span class="result-value" id="inf-strength">—</span>
+      </div>
+      <div class="result-row">
+        <span class="result-label">Relative weight (vs solid)</span>
+        <span class="result-value" id="inf-weight">—</span>
+      </div>
+      <div class="result-row">
+        <span class="result-label">Relative print time (vs solid)</span>
+        <span class="result-value" id="inf-time">—</span>
+      </div>
+      <div class="result-row">
+        <span class="result-label">Best used for</span>
+        <span class="result-value" id="inf-use">—</span>
+      </div>
+      <div class="result-note">Beyond 40–50% infill, adding more infill has diminishing returns on strength. Adding wall count is more effective for strength than increasing infill percentage.</div>
+    </div>
+  </div>
+
+  <div class="ad-rectangle" id="ad-mid">Ad</div>
+  <div class="seo-section">
+    <h2>Understanding 3D Print Infill</h2>
+    <p>Infill is the internal structure of a 3D print. Higher infill percentages make parts stronger and heavier, but with diminishing returns above 40–50%.</p>
+    <p>The infill pattern matters as much as the percentage. Gyroid and cubic patterns distribute stress in all directions (isotropic). Grid and lines are anisotropic — strong in some directions, weak in others. For most functional parts, 20–40% gyroid or cubic infill with 3–4 walls provides the best balance.</p>
+  </div>
+</main>
+<footer>Free 3D printing calculators. No signup, no tracking. Actual results depend on slicer settings and printer calibration.<br>Built by <a href="https://thehivemakes.github.io/" style="color:var(--accent)">The Hive</a></footer>
+<script>
+
+function calculate() {
+  const pct = CalcCore.get('inf_pct');
+  const pattern = CalcCore.getSelect('inf_pattern');
+  const walls = CalcCore.get('walls') || 3;
+  if (isNaN(pct)||pct<0||pct>100) return;
+
+  const patternMultiplier = {grid:0.8, gyroid:1.0, triangles:0.95, honeycomb:0.9, cubic:1.0};
+  const pm = patternMultiplier[pattern] || 1;
+
+  // Diminishing returns model: strength ~ 1 - e^(-pct/30)
+  const rawStrength = (1 - Math.exp(-pct/30)) * pm;
+  const strengthPct = rawStrength * 100;
+  const wallBonus = (walls - 2) * 10;
+  const totalStrength = Math.min(100, strengthPct + wallBonus);
+
+  const weight = (0.3 + 0.7 * pct/100); // shells are ~30% weight
+  const time = (0.4 + 0.6 * pct/100); // shells are ~40% time
+
+  let use;
+  if (pct <= 10) use = 'Display models, non-functional parts';
+  else if (pct <= 25) use = 'General purpose, light-duty functional parts';
+  else if (pct <= 50) use = 'Functional parts under moderate stress';
+  else use = 'High-stress parts, load-bearing applications';
+
+  CalcCore.set('inf-strength', CalcCore.fmt(totalStrength, 0) + '% of solid strength (approx)');
+  CalcCore.set('inf-weight', CalcCore.fmt(weight*100, 0) + '% of solid weight');
+  CalcCore.set('inf-time', CalcCore.fmt(time*100, 0) + '% of solid print time');
+  CalcCore.set('inf-use', use);
+  CalcCore.showResult();
+  CalcCore.saveParams(['inf_pct','inf_pattern','walls']);
+}
+
+function clearAll() {
+  ["inf_pct", "inf_pattern", "walls"].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = el.defaultValue || '';
+  });
+  document.getElementById('result').classList.remove('visible');
+  history.replaceState(null, '', window.location.pathname);
+}
+
+document.addEventListener('DOMContentLoaded', () => { if (window.location.search) calculate(); });
+</script>
+</body>
+</html>

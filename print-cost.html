@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Print Cost Calculator — PrintCalc</title>
+<meta name="description" content="3D print cost calculator. Material, electricity, printer depreciation, and labor. Find your true cost per print. Free tool.">
+<meta property="og:title" content="Print Cost Calculator — PrintCalc">
+<meta property="og:description" content="3D print cost calculator. Material, electricity, printer depreciation, and labor. Find your true cost per print. Free tool.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://thehivemakes.github.io/hive-print-calc/print-cost.html">
+<link rel="stylesheet" href="style.css">
+<script src="js/calc-core.js"></script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "Print Cost Calculator",
+  "url": "https://thehivemakes.github.io/hive-print-calc/print-cost.html",
+  "description": "3D print cost calculator. Material, electricity, printer depreciation, and labor. Find your true cost per print. Free tool.",
+  "applicationCategory": "UtilityApplication",
+  "operatingSystem": "Any"
+}
+</script>
+</head>
+<body>
+<header><div class="header-inner"><div class="logo">Print<span>Calc</span></div><div class="tagline">Free 3D printing calculators</div></div></header>
+<nav><div class="nav-inner"><a href="index.html">PrintCalc</a><span class="sep">/</span><span>Print Cost Calculator</span></div></nav>
+<main>
+  <div class="ad-leaderboard" id="ad-top">Ad</div>
+  <div class="card">
+    <h1>Print Cost Calculator</h1>
+    <p class="subtitle">Estimate the true cost of a 3D print including all hidden costs.</p>
+    <div class="form-grid">
+      <div class="field">
+        <label for="mat_cost">Material cost ($)</label>
+        <input type="number" id="mat_cost" step="0.01" placeholder="2.50">
+      </div>
+      <div class="field">
+        <label for="print_hours">Print time (hours)</label>
+        <input type="number" id="print_hours" step="0.1" placeholder="4">
+      </div>
+      <div class="field">
+        <label for="printer_watts">Printer power (watts)</label>
+        <input type="number" id="printer_watts" step="10" placeholder="200" value="200">
+      </div>
+      <div class="field">
+        <label for="kwh_cost">Electricity cost ($/kWh)</label>
+        <input type="number" id="kwh_cost" step="0.01" placeholder="0.12" value="0.12">
+      </div>
+      <div class="field">
+        <label for="printer_cost">Printer purchase price ($)</label>
+        <input type="number" id="printer_cost" step="1" placeholder="300">
+      </div>
+      <div class="field">
+        <label for="printer_life">Printer lifespan (hours)</label>
+        <input type="number" id="printer_life" step="100" placeholder="2000" value="2000">
+      </div>
+      <div class="field">
+        <label for="failure_rate">Failure rate (%)</label>
+        <input type="number" id="failure_rate" step="1" placeholder="10" value="10">
+      </div>
+    </div>
+    <button class="btn btn-primary" onclick="calculate()">Calculate</button>
+    <button class="btn btn-ghost" onclick="clearAll()">Clear</button>
+    <div class="result" id="result">
+      <div class="result-row">
+        <span class="result-label">Material</span>
+        <span class="result-value" id="pc-material">—</span>
+      </div>
+      <div class="result-row">
+        <span class="result-label">Electricity</span>
+        <span class="result-value" id="pc-electric">—</span>
+      </div>
+      <div class="result-row">
+        <span class="result-label">Printer depreciation</span>
+        <span class="result-value" id="pc-deprec">—</span>
+      </div>
+      <div class="result-row">
+        <span class="result-label">Failure cost adjustment</span>
+        <span class="result-value" id="pc-failure">—</span>
+      </div>
+      <div class="result-row">
+        <span class="result-label">Total cost per print</span>
+        <span class="result-value" id="pc-total">—</span>
+      </div>
+      <div class="result-note">True cost = material + electricity + (printer price / lifetime hours × print hours) + failure adjustment. For selling prints, add your desired margin on top.</div>
+    </div>
+  </div>
+
+  <div class="ad-rectangle" id="ad-mid">Ad</div>
+  <div class="seo-section">
+    <h2>The True Cost of 3D Printing</h2>
+    <p>The cost of a 3D print goes beyond filament. Electricity, printer wear, failed prints, and your time all factor in. This calculator gives you the full picture.</p>
+    <p>Most hobbyists underestimate costs by 40-60% when they only count filament. Printer depreciation alone typically adds $0.10-0.30 per hour of printing.</p>
+  </div>
+</main>
+<footer>Free 3D printing calculators. No signup, no tracking. Actual results depend on slicer settings and printer calibration.<br>Built by <a href="https://thehivemakes.github.io/" style="color:var(--accent)">The Hive</a></footer>
+<script>
+
+function calculate() {
+  const mat = CalcCore.get('mat_cost') || 0;
+  const hours = CalcCore.get('print_hours');
+  const watts = CalcCore.get('printer_watts');
+  const kwh = CalcCore.get('kwh_cost');
+  const pCost = CalcCore.get('printer_cost') || 0;
+  const pLife = CalcCore.get('printer_life') || 2000;
+  const fail = (CalcCore.get('failure_rate') || 0) / 100;
+  if (isNaN(hours)||hours<=0) return;
+
+  const electric = (watts/1000) * hours * kwh;
+  const deprec = (pCost / pLife) * hours;
+  const subtotal = mat + electric + deprec;
+  const failAdj = subtotal * fail;
+  const total = subtotal + failAdj;
+
+  CalcCore.set('pc-material', '$' + CalcCore.fmt(mat, 2));
+  CalcCore.set('pc-electric', '$' + CalcCore.fmt(electric, 2));
+  CalcCore.set('pc-deprec', '$' + CalcCore.fmt(deprec, 2));
+  CalcCore.set('pc-failure', '$' + CalcCore.fmt(failAdj, 2) + ' (' + CalcCore.fmt(fail*100,0) + '% failure buffer)');
+  CalcCore.set('pc-total', '$' + CalcCore.fmt(total, 2));
+  CalcCore.showResult();
+  CalcCore.saveParams(['mat_cost','print_hours','printer_watts','kwh_cost','printer_cost','printer_life','failure_rate']);
+}
+
+function clearAll() {
+  ["mat_cost", "print_hours", "printer_watts", "kwh_cost", "printer_cost", "printer_life", "failure_rate"].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = el.defaultValue || '';
+  });
+  document.getElementById('result').classList.remove('visible');
+  history.replaceState(null, '', window.location.pathname);
+}
+
+document.addEventListener('DOMContentLoaded', () => { if (window.location.search) calculate(); });
+</script>
+</body>
+</html>
