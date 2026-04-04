@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url><loc>https://print.thehivemakes.com/</loc><priority>1.0</priority></url>
-  <url><loc>https://print.thehivemakes.com/filament.html</loc><priority>0.8</priority></url>
-  <url><loc>https://print.thehivemakes.com/print-cost.html</loc><priority>0.8</priority></url>
-  <url><loc>https://print.thehivemakes.com/print-time.html</loc><priority>0.8</priority></url>
-  <url><loc>https://print.thehivemakes.com/layer-height.html</loc><priority>0.8</priority></url>
-  <url><loc>https://print.thehivemakes.com/infill.html</loc><priority>0.8</priority></url>
+  <url><loc>https://thehivemakes.github.io/hive-print-calc/</loc><priority>1.0</priority></url>
+  <url><loc>https://thehivemakes.github.io/hive-print-calc/filament.html</loc><priority>0.8</priority></url>
+  <url><loc>https://thehivemakes.github.io/hive-print-calc/print-cost.html</loc><priority>0.8</priority></url>
+  <url><loc>https://thehivemakes.github.io/hive-print-calc/print-time.html</loc><priority>0.8</priority></url>
+  <url><loc>https://thehivemakes.github.io/hive-print-calc/layer-height.html</loc><priority>0.8</priority></url>
+  <url><loc>https://thehivemakes.github.io/hive-print-calc/infill.html</loc><priority>0.8</priority></url>
 </urlset>
